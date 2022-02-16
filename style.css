@@ -1,7 +1,7 @@
 
     body {
     margin: 0 auto;
-    max-width: 500px;
+    max-width: 700px;
     font-family: "Helvetica", "Arial", sans-serif;
     line-height: 1.5;
     padding: 4em 1em;
@@ -12,6 +12,11 @@
     h2 {
     margin-top: 1em;
     padding-top: 1em;
+    }
+
+    img{
+        margin-top: 1em;
+        padding-top: 1em;
     }
 
     h1,
@@ -32,4 +37,8 @@
 
     pre {
         padding: 1em;
+    }
+
+    .big{
+        font-size: 80;
     }
