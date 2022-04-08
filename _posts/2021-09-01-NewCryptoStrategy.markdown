@@ -1,9 +1,9 @@
 ---
 author: tr8dr1
 comments: true
-date: 2021-09-01 11:00:00+00:00
+date: 2021-09-06 11:00:00+00:00
 layout: post
-title: New Crypto Strategy
+title: New Crypto Strategy Changed
 subtitle:
 categories:
 - strategies
