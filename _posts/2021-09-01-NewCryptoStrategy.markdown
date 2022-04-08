@@ -3,7 +3,7 @@ author: tr8dr1
 comments: true
 date: 2021-09-06 11:00:00+00:00
 layout: post
-title: New Crypto Strategy Changed
+title: New Crypto Strategy Changed 操你妈
 subtitle:
 categories:
 - strategies
@@ -12,6 +12,8 @@ I have a new stat/arb strategy in crypto that uses an adaptive state based syste
 on small portfolios of coins.  I have identified ~1600 such portfolios across 200 coins, each of which is traded
 as a strategy.  In practice I trade a portfolio of these strategies (which I term, "stratlets"), where the strategy
 is defined as a dynamically weighted portfolio of these stratlets.
+
+操你妈，操你妈，操你妈
 
 ## Setup
 While each stratlet is adaptive, adjusting internal parameters over time, there are some hyper parameters for the
