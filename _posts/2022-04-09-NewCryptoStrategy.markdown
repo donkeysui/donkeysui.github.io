@@ -3,7 +3,7 @@ author: donkey sui
 comments: true
 date: 2022-04-09 11:00:00+00:00
 layout: post
-title: 关于加密货币微观结构的一点思考
+title: Some mimics
 subtitle:
 categories:
 - strategies
