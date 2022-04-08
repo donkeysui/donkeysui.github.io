@@ -1,85 +1,19 @@
 ---
-author: tr8dr
+author: donkey sui
 comments: true
-date: 2021-09-01 11:00:00+00:00
+date: 2022-04-09 11:00:00+00:00
 layout: post
-title: New Crypto Strategy
+title: 关于加密货币微观结构的一点思考
 subtitle:
 categories:
 - strategies
 ---
-I have a new stat/arb strategy in crypto that uses an adaptive state based system to identify MR opportunities
-on small portfolios of coins.  I have identified ~1600 such portfolios across 200 coins, each of which is traded
-as a strategy.  In practice I trade a portfolio of these strategies (which I term, "stratlets"), where the strategy
-is defined as a dynamically weighted portfolio of these stratlets.
 
-## Setup
-While each stratlet is adaptive, adjusting internal parameters over time, there are some hyper parameters for the
-following layers:
+## 过小的Bid-Ask Spread
+对于做市商业务，与传统市场的不同点在于加密货币的spread收益实在太小，以国内期货市场的甲醇为例，在此时此刻甲醇期货的ticksize大概是2bp，而币安BTC正向合约的ticksize大概是0.0024bp，如此悬殊的ticksize差距，就使得所谓的"capture spread"变得不可能，如果用传统市场上那一套inventory的思路来做加密货币高频，那会失败的很彻底，因为在ticksize+rebate上赚的钱是不可能cover informed对手盘损失的。 因此做市业务一定要把重心从提供流动性上转移，要做点别的事情来赚到流动性的钱，而不是capture spread。
 
-- __model__:
-  * 5 dynamic parameters inferred over time
-  * 1 fixed parameter
-  * 1 parameter to be optimised
-- __trading state machine__:
-  * 3 parameters to be optimised
-- __money management__:
-  * 2 parameters to be optimised
+## 过大的数据量
+在国内的二级市场从业者中，很难想象数字货币的交易数据到底多到了什么程度：24h开盘，逐tick推送quotes & trades。和国内市场不足十小时的开盘时间，一秒四跳是没办法比的。数据多有好处、也有坏处。好处就是数据多暴露出来的信息就多，就更容易让有能力挖掘其中信息的人获益，坏处就是从技术层面上获取和存储、转移数据的难度会变大，而且鉴于目前交易所的基建之差、与交易所之间不统一的数据接口，也给交易者增添了很多麻烦：要考虑服务端的稳定性、要处理本地数据繁多复杂的ETL问题。 这种蛮荒，站在2022年来看，一定是好事情。
 
-In order to avoid overfitting, rather than optimising all 6 free parameters at once, took the following approach:
-
-1. optimise each layer separately:  i.e. the model, trading, and MM are optimised separately
-2. restrict the parameter values to a small # of discrete possibilities
-3. perturbation analysis to make sure the "solution" is not overly sensitive to the optimal setting
-
-I assumed 30bps in transaction costs and slippage in backtesting.  Trade profitability is quite high, so is not terribly
-sensitive to transaction cost.  I am expecting < 10bps in transaction costs, so the remaining 20bps relates to execution slippage.
-
-## Results
-99% of the 1600 stratlets were __very positive out-of-sample__.  The remaining ~15 losing stratlets had easily identified
-issues during the in-sample period, with low to negative performance in-sample.  These 15 portfolios also scored poorly
-in terms of stationarity as well.
-
-I observed a wide range of risk characteristics across the strategies (Sortino, Calmar, etc), so wanted to understand to
-what degree the losing trades are correlated across stratlets.  __If the losses were highly correlated__ then bundling into a portfolio
-would __not tend to improve the overall risk__.  Fortunately, as we shall see, the losses are __relatively uncorrelated__, leading to
-__improved risk characteristics__ when trading a larger # of stratlets.
-
-### Small Portfolio
-Here is the performance of a small portfolio based on higher-liquidity stratlets ranked by the Calmar ratio within the validation period.
-The individual stratlets have sortino's ranking from 0.6 to 3.2 within this small set, however __the effective Sortino for the
-portfolio is higher__, at 4.3:
-
-<img src="/assets/2021-09-01/top-5.png" width="700" height="550" />
-
-### Medium Portfolio
-The risk characteristics improve even further to 10.3 with the larger top-25 portfolio:
-
-<img src="/assets/2021-09-01/top-25.png" width="700" height="550" />
-
-So the good news is that the losses appear to be relatively independent across stratlets allowing us to average these out
-with other profitable stratlets during the loss periods.
-
-### Large Portfolio
-I evaluated a portfolio based solely on the sortino seen within the training period, selecting stratlets with sortino > 3.
-(selecting ~600 stratlets).  Note that the validation period was not used in portfolio
-selection, providing a longer unseen period, from late March to current:
-
-<img src="/assets/2021-09-01/all.png" width="700" height="550" />
-
-This appears to an excellent result, with a Sortino of 22.4 and 4682% return.  However, the return seems __too good to be true__,
-and it is.  This result __assumes__ we can __execute in size__ (and at equal size) across stratlets.   In reality, scaling up
-this strategy would underweight the majority of stratlets and overweight a smaller set with higher liquidity (the 
-lower liquidity stratlets have higher returns than the highly liquid ones).
-
-## Notes
-1. I have not accounted for execution failures (for example missed legs)
-   * will have to see how this plays out in live
-2. Many of these stratlets are liquidity constrained, so the actual return when size adjusted will be lower.
-   * the lowest liquidity portfolios can only handle, maybe, 10K / trade, while the highest, potentially a few
-     million.
-3. Live performance might degrade by 3 - 5x
-   * due to the above considerations
-4. The nature of stat/arb is that over time, the market will become more efficient
-   * so I expect that the profitability of the strategy will diminish over time.
-
+## 有效性?
+市场的有效性是高是低？这问题一度困惑我，在我现在的视角来看，这个市场的有效性呈现出很奇怪的模式，就是简单的无风险套利策略填充了底层的大量有效性，但这种填充又不是那么彻底：仍然有很多很简单的策略能够在市场上每天赚到大量的钱。而另一方面，传统市场的CTA策略和事件驱动策略表现不是那么良好（来自同行的经验分享）。因为spread小，所以使用best ask以及best bid进行mid-price改良版建模是个几乎没意义的事，因为如果只用best bid和best ask建模，改良版的mid-price只能在mid-price以及weighted-mid-price之间，但就算是把imbalance拉满，wmp和mp的差别顶多也就是ticksize/2, 近似可以认为是没有。 用last trade和多档深度、结合Roll's Model做个综合性的fair price建模可能有点用？
