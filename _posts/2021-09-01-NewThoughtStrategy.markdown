@@ -3,7 +3,7 @@ author: donkey sui
 comments: true
 date: 2022-04-07 11:00:00+00:00
 layout: post
-title: Some mimics
+title: crypto微观结构呓语
 subtitle:
 categories:
 - strategies
