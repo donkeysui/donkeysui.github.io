@@ -1,3 +1,4 @@
+---
 author: donkey sui
 comments: true
 date: 2022-08-31 11:00:00+00:00
@@ -79,4 +80,4 @@ __可能遇到的问题__
 
 ### 执行策略
 
-<img src="/assets/2021-08-31/trading_pseudo.png" width="800" height="750" />
+<img src="/assets/2021-08-31/trading_pesudo.jpg" width="800" height="750" />
