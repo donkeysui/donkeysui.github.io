@@ -1,18 +1,23 @@
 ---
-layout: home
+layout: default
 ---
 
-<div class="posts clearfix">
-  {% for post in site.posts %}
-    <article class="post">    
-      <div class="eyebrow">{{ post.date | date: "%d %b %Y" }}</div>
-      <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
+<div class="home">
 
-      <div class="entry">
-	<p>{{ post.desc }}</p>
-	{{ post.content | truncatewords:80 }}
-      </div>
+  <h1 class="page-heading">Posts</h1>
 
-    </article>
-  {% endfor %}
+  <ul class="post-list">
+    {% for post in site.posts %}
+      <li>
+        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+
+        <h2>
+          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+        </h2>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+
 </div>
