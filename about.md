@@ -1,6 +1,6 @@
 ---
 layout: page
-title: About
+title: 锈蚀终将战胜刀剑
 permalink: /about/
 ---
 
