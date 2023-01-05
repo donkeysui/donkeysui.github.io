@@ -4,10 +4,10 @@
     <title>Хааны Тэмдэглэл 可汗日报</title>
     <description>可汗日报，不定时更新二级市场研究、社会评价、学习笔记、个人感悟。 所有图片影像资料与文本版权归比特汗国全体国民所有。
 </description>
-    <link>http://0.0.0.0:4000/</link>
-    <atom:link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 05 Jan 2023 10:46:59 +0000</pubDate>
-    <lastBuildDate>Thu, 05 Jan 2023 10:46:59 +0000</lastBuildDate>
+    <link>http://donkeysui.github.com/</link>
+    <atom:link href="http://donkeysui.github.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 05 Jan 2023 10:47:32 +0000</pubDate>
+    <lastBuildDate>Thu, 05 Jan 2023 10:47:32 +0000</lastBuildDate>
     <generator>Jekyll v3.8.6</generator>
     
       <item>
@@ -23,8 +23,8 @@
 &lt;p&gt;说白了，之所以所有外国人在越南都拥有极高地位，不过是因为国际资本才是越南人实际上的的太上皇——而不是胡志明。&lt;/p&gt;
 </description>
         <pubDate>Tue, 03 Jan 2023 20:25:39 +0000</pubDate>
-        <link>http://0.0.0.0:4000/jekyll/update/2023/01/03/vietnam-revolution.html</link>
-        <guid isPermaLink="true">http://0.0.0.0:4000/jekyll/update/2023/01/03/vietnam-revolution.html</guid>
+        <link>http://donkeysui.github.com/jekyll/update/2023/01/03/vietnam-revolution.html</link>
+        <guid isPermaLink="true">http://donkeysui.github.com/jekyll/update/2023/01/03/vietnam-revolution.html</guid>
         
         
         <category>jekyll</category>
@@ -51,8 +51,8 @@
 
 </description>
         <pubDate>Tue, 03 Jan 2023 20:25:39 +0000</pubDate>
-        <link>http://0.0.0.0:4000/jekyll/update/2023/01/03/welcome-to-jekyll.html</link>
-        <guid isPermaLink="true">http://0.0.0.0:4000/jekyll/update/2023/01/03/welcome-to-jekyll.html</guid>
+        <link>http://donkeysui.github.com/jekyll/update/2023/01/03/welcome-to-jekyll.html</link>
+        <guid isPermaLink="true">http://donkeysui.github.com/jekyll/update/2023/01/03/welcome-to-jekyll.html</guid>
         
         
         <category>jekyll</category>
