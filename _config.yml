@@ -7,14 +7,13 @@
 
 # Site settings
 title: Хааны Тэмдэглэл 可汗日报
-email: suiminyan@gmail.com
+email: khaani.temdeglel@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
         可汗日报，不定时更新二级市场研究、社会评价、学习笔记、个人感悟。
         所有图片影像资料与文本版权归比特汗国全体国民所有。
         
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://donkeysui.github.com" # the base hostname & protocol for your site
-twitter_username: None
 github_username:  donkeysui
 
 # Build settings
