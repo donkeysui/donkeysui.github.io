@@ -12,6 +12,18 @@
         </ul>
       </div>
 
+
+    <h2 class="footer-heading">
+      {% if page.layout == "post" %}
+        <span id="busuanzi_container_site_pv" style='display:none'>
+         本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+      {% endif %}
+    </h2>
+
+
+	
+
       <div class="footer-col footer-col-2">
         <ul class="social-media-list">
           {% if site.github_username %}

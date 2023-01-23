@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>高频因子是怎么回事 —— 正确的、错误的、与瞎编的</title>
+  <meta name="description" content="本文主要描述我在过去一年里对微观结构的错误研究（指被实证推翻的直觉、假设或道听途说来的流言）。写这篇文章的直接原因是我在过去一段时间里发现了一些新的结论，导致我对过去的一些做法产生怀疑、并一点点通过实证证伪（做减法），筛选出了暂时比较好用的方法，而这些被证伪的方法论我很长时间内都不会再用了，所以这种单纯的分享不会...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://0.0.0.0:4000/jekyll/update/2022/09/26/hft-features.html">
+  <link rel="alternate" type="application/rss+xml" title="Хааны Тэмдэглэл 可汗日报" href="http://0.0.0.0:4000/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Хааны Тэмдэглэл 可汗日报</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">锈蚀终将战胜刀剑</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">高频因子是怎么回事 —— 正确的、错误的、与瞎编的</h1>
+    <p class="post-meta"><time datetime="2022-09-26T00:25:39+00:00" itemprop="datePublished">Sep 26, 2022</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>本文主要描述我在过去一年里对微观结构的错误研究（指被实证推翻的直觉、假设或道听途说来的流言）。写这篇文章的直接原因是我在过去一段时间里发现了一些新的结论，导致我对过去的一些做法产生怀疑、并一点点通过实证证伪（做减法），筛选出了暂时比较好用的方法，而这些被证伪的方法论我很长时间内都不会再用了，所以这种单纯的分享不会给我个人带来负面后果。</p>
+
+<p>而被（暂时）证伪的方法论和结论并不是完全没有价值的，至少能给圈外对高频交易感兴趣的人提供厕上读物。</p>
+
+<h2 id="数据结构">数据结构</h2>
+<p>本人目前使用的数据结构只有orderbook snapshot与逐笔trade，orderbook数据共记录十档（ask price 1-10, bid price 1-10, ap1-10 &amp; bp 1-10 for short），trade就没什么可说的，包含交易价格、交易量、主动买入/卖出方向、时间戳。</p>
+
+<h2 id="正文呓语">正文呓语</h2>
+<p>想要通过大力出奇迹得到靠谱模型的尝试大概率结局是发现自己浪费了粮食和电、与自己并不精彩的青春。我对此事的理解是，如果你想从一段充满噪音的价格序列中识别出某种规律，那么你总是能找到一个让你血液冲头、心飘会所的“规律”。而这种规律大概率是p-value hacking产物。</p>
+
+<p>那我多加几个测试集，做K-Fold检验行不行呢？ 当然可以，我们先抛开价格的时序性问题，即不能用明天的数据训练来预测昨天的数据（因为这在不能穿越时空的情况下根本不可行，所以可能会产生无意义的结果），有时间机器的大私募可以无视这个问题。加测试集的结果可能会是更低频率触发p-value hacking，导致你浪费了更多的粮食、电与并不精彩的青春。</p>
+
+<p>波动率小的时候我就挂的近一点，波动率大的时候我就挂的远一点，所谓做市，就是把波动率小的单子挂的近近的、波动率大的挂的远远的。这纯粹是理想主义者的空想与错误归纳，事实上就如同明末蜀地的农民心想他妈的这帮人逃什么难呢，所谓明末生存法则，不过就是李闯王来了我藏粮食嗯造、大西王来了我尽数交粮，这衣民在轮回了几百个存档之后觉得他妈的老子真是天下第一聪明，明末生存都让老子玩明白了。但更可能发生的情况是，李闯王来了你藏粮食嗯造没问题，但是当大西王来的时候，不仅大西圣帝要尽数收走你的钱粮，还要顺手夹爆你的头。</p>
+
+<p>但不是所有的流民都能认识到大西王到底有多残暴，对于有的人来说，既然在闯王来的时候我嗯造的粮食能cover丢条命的风险，那我就得过且过这么过着呗，带着老婆孩子润那是麻烦上天的狗屁倒灶。</p>
+
+<p>在微观的挂单交易情况下，挂单做多和挂单做空不是完全相反的，这就如同亢米主义中主张的：“越南京族无厂者与美利坚爱尔兰裔五厂者是一家人，五厂者是没有祖国的”，相反地，挂单做多和吃单做多之间的差别可能超乎一般人的想象，尽管民族主义者主张无论吃单挂单，能做多的都是一家人。挂单做多和挂单做空之间的相似性甚至比挂单做多和吃单做多要紧密的多。我的经验是，对于market maker问题，要抓住主要矛盾，判断该挂还是不该挂比判断该多还是该空要重要得多。</p>
+
+<p>在maker-taker结构的市场中（尤其是给maker提供rebate的），手续费一定要作为spread的一部分被考虑，比如计算fair price和total variation的时候，在手续费显著高于ticksize时，mid price的变化就开始“失真”，在这种情况下，tob的挂单信息本身就是价格的“一部分”。对于这种tob的imbalance能预测未来的“价格变化”这件事，其实质是imbalance本身就是“价格”，而如果只把mid price当成真正的价格去预测，那无疑会丢掉很多信息/掺入很多杂音。但是人的心理是很复杂的，不是所有的人都能接受“价格”不是实实在在看得到的float64，而是一个高维矩阵这件事的。对于有的人来说，让他接受他妈的price不是一个float64这一观念比让他相信资本主义是个骗局这事还难。</p>
+
+<p>关于maker-taker结构市场中的“手续费”问题，在很多P宗的文章里，手续费和返佣是一样多的，也就是假设韭菜/庄家的手续费全部给了做市商，这显然是不可能的，有相当大的一部分钱要被拿去润滑不同的人，taker fee &gt; maker fee是必然的。在计算real spread(也就是加上手续费的spread）时就要考虑到底用taker fee还是用maker fee，还是选个参数把两者融合起来。</p>
+
+<p>预测涨跌和赚钱之间的距离随着交易频率的提高会变得越来越远，在小时、日级别上的价格预测基本上就等于躺床收米，但在毫秒、秒级别上的“价格”预测就容易出现测不准的情况，即你预测你的、我亏我的。</p>
+
+<p>从经验上来讲，对于高频下的预测问题，预测该不该下单比预测往哪边下单更重要。</p>
+
+<p>人的判断与愿望是没有办法分离的，人总会偏向于自己的愿望做出判断，如果人想要做到不自欺，让自己的预期更贴近于真实情况，往往要想明白自己的愿望是什么，然后在自己的判断中减去一部分愿望的成分。</p>
+
+<p>人是未必能够意识到自己赚的钱是怎么来的，但是人天生有归纳的心理倾向。如果一个人赚了钱，那么他总要找个单一理由来让自己感到安心：我天天印钱，首先和我每天早起晚睡的自律情况有关、其次就是我是个很聪明的人、我是人精、人尖子、我是四海之皇、是东方的明珠、大家都想不出这么优秀的策略和做法、我的策略跑起来时，我必让它显为圣、显为大、在多种标的上赚钱，到时候他们就知道我是驴可汗/芭比球/Marcoz/其他。</p>
+
+<p>接上条，人未必能意识到自己的alpha是哪里来的。市场的淘汰机制和自然界的淘汰机制是有相似之处的，雄性智人未必能显式地意识到有洞就插是最优策略，也未必能意识到吃烧烤会比吃生肉更有利（减少寄生虫、酯类有机物促进大脑发育等）。但是最后爱吃烧烤的智人淘汰掉了不爱吃烧烤的智人，至于爱吃烧烤这件事，完全是随机进化出来的，和人的主观能动性没半毛钱关系。在复盘阶段，智人会发明一堆理论来证明自身的存在合理性，比如是上帝/安拉/腾格里/女娲/湿婆按照自己的形象制造了人，人是万物的灵长，但其实现在的智人存在的理由可能只是源自爱吃烧烤、爱插大洞与贪生怕死。而策略也是一样的，人未必能找到自身真正的alpha来源——也许根本就不可能找到，但这不影响智人遍布全球烧烤大洞嗯造。</p>
+
+<p>得过且过的产业中不容许有本体论式的推断和总结。</p>
+
+<p>一个所谓Quant到底是坐在电脑前面研究数据、借此来洞悉市场（至少是市场的一个部分）、对市场上的其他参与者形成事实上的经济奴役关系，还是浪费粮食和电、拿着工资骗老板、骗投资人、骗自己这两件事之间是完全没有办法区分的。</p>
+
+<h2 id="高频因子有用的没用的与瞎编的">高频因子（有用的、没用的与瞎编的）</h2>
+
+<ol>
+  <li>高频因子基本上就是这么一回事：用orderbook和trades的静态信息与时序信息进行组合，写成一个函数，该函数接受orderbook和trades的窗口信息，然后返回一个float64作为特征值，然后可以拿这个特征值与目标值target计算pearson相关性（初级的做法），我看有些同行还用permutation test来做，但permutation test有其本身的问题，就是permutation test忽视了连续因子值的相似性。</li>
+  <li>比如对于一个因子A，假设该因子遵守0到99的均匀分布，且该因子有如下性质：A的整数部分是奇数时与目标正相关、相反时是负相关。这个因子是我编造出来借以说明的极端情况，我们可以试想如果拿这个因子做pearson corr检验，结果一定会很不好看，相关性会压得很低，p-value可能也会很高，但在上帝视角下这个因子可能是个非常好的因子，但如果没有合适的检验方法，我们可能一辈子都没办法真正“发现”这个因子。</li>
+  <li>关于第一点中所说的连续因子值的相似性，我想表达的是这样的一种概念：与因子A相比，我们假设另一个因子B与A同分布，但B的性质是小于50时正相关，但大于50之后马上变成负相关，显然B因子也很难通过简单的pearson corr检验发现，且如果将A和B这样的因子直接丢进线性回归里嗯算，那基本上是不会有什么作用的。说回连续因子值的相似性问题，B因子的性质显然是比A因子要好得多的，如果任取一段连续的因子值，B取到性质相同的片段概率比A大得多。这就使得B因子更容易被非线性的学习器所学会，而A可能陷入学习器不努力学不会/学习器太努力过拟合的困境。</li>
+  <li>关于上面所说的B因子，我是可以举出一个例子的，比如任意一边挂单在一段时间内的总挂撤单量问题，我曾经在某instrument上观察过这样的一种现象：买方挂单陡增时更可能伴随“价格”上升，买方挂单少量减少时可能伴随“价格”下降，而买方挂单大量撤退时又反过来倾向于“价格上升”。</li>
+  <li>大量堆因子尝试提高metrics可能是LSTM流派的变体，在多年里我们一直能观察到有行外人提问LSTM对价格的预测能力，然后评论区一突开啊，满脸是“要预测return而不是price，这根本没用”。我认为预测价格应该是每一个学过LSTM的人的第一直觉，如果一个人学了LSTM去预测价格、那他不会有什么收获，如果一个人学了LSTM而想不到拿这个去预测价格，那他压根就没有脑子。有不少同行仍然在堆因子，试图越来越准确的预测“价格”的变化，这一做法看起来是符合直觉的：即我把各种各样的市场维度都整理好，一股脑喂给学习器，然后让学习器努力，我躺着收米，学习器比我聪明得多，能发现市场中各种各样的隐藏规律，根据弱学习器原理（还是定理来着，忘记了），对于集成模型，我只要弱特征嗯喂，学习器就会越来越强，非常好工作，爱来自昌南。我对这种做法的合理性存疑，我不能说这种方法一定不行，这超出了我的判断能力。</li>
+  <li>微观结构中微不足道的改变带来的可能是翻天覆地的结果变化，很多条件的变化都是高度非线性的，比如如果做市商挂单一秒就撤单、与挂单两秒才撤单可能产生完全不同的PNL分布情况。</li>
+  <li>静态的因子信息太少了，如果想深入去做，最好从时序上去下功夫。（这是我的空想，我对此条不负责任）</li>
+</ol>
+
+<h2 id="我因子库中的部分因子">我因子库中的部分因子</h2>
+
+<p>这些因子基本都没什么用，只是偶尔有几个我觉得比较好，但我也不会特别点出来。</p>
+
+<p>至于这些因子都是用来干什么的，反正不是用来预测涨跌的。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">inf_ratio</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">trade</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">quasi</span> <span class="o">=</span> <span class="n">trade</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">dif</span> <span class="o">=</span> <span class="n">trade</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quasi</span> <span class="o">/</span> <span class="p">(</span><span class="n">dif</span> <span class="o">+</span> <span class="n">quasi</span><span class="p">)</span>
+ 
+<span class="k">def</span> <span class="nf">depth_price_range</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">trade</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">depth</span><span class="o">.</span><span class="n">ap1</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">depth</span><span class="o">.</span><span class="n">ap1</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">nb</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">get_age</span><span class="p">(</span><span class="n">prices</span><span class="p">):</span>
+    <span class="n">last_value</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">last_value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">age</span>
+        <span class="n">age</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">age</span>
+
+<span class="k">def</span> <span class="err">(</span><span class="nf">ask</span><span class="o">/</span><span class="n">bid</span><span class="p">)</span><span class="n">_age</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">bp1</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="s">'bp1'</span><span class="p">]</span>
+        <span class="n">bp1_changes</span> <span class="o">=</span> <span class="n">bp1</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="n">get_age</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s">'numba'</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bp1_changes</span>
+
+<span class="k">def</span> <span class="nf">arrive_rate</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">trade</span><span class="p">[</span><span class="s">'ts'</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">res</span>
+
+<span class="k">def</span> <span class="nf">cofi</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="s">'bv1'</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'bp1'</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="s">'bv1'</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">()</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'bp1'</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="s">'av1'</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="s">'av1'</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">()</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span> <span class="o">-</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bp_rank</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">depth</span><span class="o">.</span><span class="n">bp1</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">rank</span><span class="p">())</span><span class="o">/</span><span class="n">n</span><span class="o">*</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">ap_rank</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">depth</span><span class="o">.</span><span class="n">ap1</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">rank</span><span class="p">())</span><span class="o">/</span><span class="n">n</span><span class="o">*</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">price_impact</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">ask</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">ask_v</span><span class="p">,</span> <span class="n">bid_v</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">ask</span> <span class="o">+=</span> <span class="n">depth</span><span class="p">[</span><span class="n">f</span><span class="s">'ap{i}'</span><span class="p">]</span> <span class="o">*</span> <span class="n">depth</span><span class="p">[</span><span class="n">f</span><span class="s">'av{i}'</span><span class="p">]</span>
+        <span class="n">bid</span> <span class="o">+=</span> <span class="n">depth</span><span class="p">[</span><span class="n">f</span><span class="s">'bp{i}'</span><span class="p">]</span> <span class="o">*</span> <span class="n">depth</span><span class="p">[</span><span class="n">f</span><span class="s">'bv{i}'</span><span class="p">]</span>
+        <span class="n">ask_v</span> <span class="o">+=</span> <span class="n">depth</span><span class="p">[</span><span class="n">f</span><span class="s">'av{i}'</span><span class="p">]</span>
+        <span class="n">bid_v</span> <span class="o">+=</span> <span class="n">depth</span><span class="p">[</span><span class="n">f</span><span class="s">'bv{i}'</span><span class="p">]</span>
+    <span class="n">ask</span> <span class="o">/=</span> <span class="n">ask_v</span>
+    <span class="n">bid</span> <span class="o">/=</span> <span class="n">bid_v</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span> <span class="o">-</span> <span class="n">ask</span><span class="p">)</span><span class="o">/</span><span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'bp1'</span><span class="p">]</span> <span class="o">-</span> <span class="n">bid</span><span class="p">)</span><span class="o">/</span><span class="n">depth</span><span class="p">[</span><span class="s">'bp1'</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">"price_impact"</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">depth_price_skew</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">):</span>
+    <span class="n">prices</span> <span class="o">=</span> <span class="p">[</span><span class="s">"bp5"</span><span class="p">,</span> <span class="s">"bp4"</span><span class="p">,</span> <span class="s">"bp3"</span><span class="p">,</span> <span class="s">"bp2"</span><span class="p">,</span> <span class="s">"bp1"</span><span class="p">,</span> <span class="s">"ap1"</span><span class="p">,</span> <span class="s">"ap2"</span><span class="p">,</span> <span class="s">"ap3"</span><span class="p">,</span> <span class="s">"ap4"</span><span class="p">,</span> <span class="s">"ap5"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">depth</span><span class="p">[</span><span class="n">prices</span><span class="p">]</span><span class="o">.</span><span class="n">skew</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">depth_price_kurt</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">):</span>
+    <span class="n">prices</span> <span class="o">=</span> <span class="p">[</span><span class="s">"bp5"</span><span class="p">,</span> <span class="s">"bp4"</span><span class="p">,</span> <span class="s">"bp3"</span><span class="p">,</span> <span class="s">"bp2"</span><span class="p">,</span> <span class="s">"bp1"</span><span class="p">,</span> <span class="s">"ap1"</span><span class="p">,</span> <span class="s">"ap2"</span><span class="p">,</span> <span class="s">"ap3"</span><span class="p">,</span> <span class="s">"ap4"</span><span class="p">,</span> <span class="s">"ap5"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">depth</span><span class="p">[</span><span class="n">prices</span><span class="p">]</span><span class="o">.</span><span class="n">kurt</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">rolling_return</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="p">((</span><span class="n">depth</span><span class="o">.</span><span class="n">ap1</span> <span class="o">+</span> <span class="n">depth</span><span class="o">.</span><span class="n">bp1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">mp</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">buy_increasing</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">v</span><span class="p">[</span><span class="n">v</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(((</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">sell_increasing</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">v</span><span class="p">[</span><span class="n">v</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(((</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="o">@</span><span class="n">nb</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">first_location_of_maximum</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">max_value</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="c1">#一个for 循环
+</span>    <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span><span class="o">==</span><span class="n">max_value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loc</span><span class="o">+</span><span class="mi">1</span>
+        
+<span class="k">def</span> <span class="nf">price_idxmax</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="n">first_location_of_maximum</span><span class="p">,</span><span class="n">engine</span><span class="o">=</span><span class="s">'numba'</span><span class="p">,</span><span class="n">raw</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">nb</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">mean_second_derivative_centra</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">sum_value</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">sum_value</span><span class="o">+=</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">5</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">sum_value</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">center_deri_two</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="n">mean_second_derivative_centra</span><span class="p">,</span><span class="n">engine</span><span class="o">=</span><span class="s">'numba'</span><span class="p">,</span><span class="n">raw</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">quasi</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">depth</span><span class="o">.</span><span class="n">ap1</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">last_range</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">arrive_rate</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">trade</span><span class="o">.</span><span class="n">ts</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">trade</span><span class="o">.</span><span class="n">ts</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">avg_trade_volume</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">avg_spread</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">depth</span><span class="o">.</span><span class="n">ap1</span> <span class="o">-</span> <span class="n">depth</span><span class="o">.</span><span class="n">bp1</span><span class="p">)</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">avg_turnover</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">depth</span><span class="p">[[</span><span class="s">'av1'</span><span class="p">,</span> <span class="s">'av2'</span><span class="p">,</span> <span class="s">'av3'</span><span class="p">,</span> <span class="s">'av4'</span><span class="p">,</span> <span class="o">.....</span><span class="p">,</span> <span class="s">'av10'</span><span class="p">,</span> <span class="s">'bv1'</span><span class="p">,</span> <span class="s">'bv2'</span><span class="p">,</span> <span class="s">'bv3'</span><span class="p">,</span> <span class="s">'bv4'</span><span class="p">,</span> <span class="o">.....</span><span class="p">,</span> <span class="s">'bv10'</span><span class="p">]]</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">abs_volume_kurt</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">kurt</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">abs_volume_skew</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">volume_kurt</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">kurt</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">volume_skew</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">price_kurt</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">kurt</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">trade_to_depth</span>
+<span class="k">def</span> <span class="nf">price_skew</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span><span class="o">.</span><span class="nb">abs</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bv_divide_tn</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">bvs</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">bv1</span> <span class="o">+</span> <span class="n">depth</span><span class="o">.</span><span class="n">bv2</span> <span class="o">+</span>  <span class="o">...</span> <span class="o">+</span> <span class="n">depth</span><span class="o">.</span><span class="n">bv10</span>
+    <span class="o">@</span><span class="n">trade_to_depth</span>
+    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">volume</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="o">=</span><span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">v</span><span class="p">[</span><span class="n">v</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">bvs</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">av_divide_tn</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">avs</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">av1</span> <span class="o">+</span> <span class="n">depth</span><span class="o">.</span><span class="n">av2</span> <span class="o">+</span>  <span class="o">...</span> <span class="o">+</span> <span class="n">depth</span><span class="o">.</span><span class="n">av10</span>
+    <span class="o">@</span><span class="n">trade_to_depth</span>
+    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trade</span><span class="o">.</span><span class="n">v</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">volume</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="o">=</span><span class="n">trade</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">v</span><span class="p">[</span><span class="n">v</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">avs</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">weighted_price_to_mid</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_columns</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">levels</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">levels</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">avs</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">get_columns</span><span class="p">(</span><span class="s">"av"</span><span class="p">,</span> <span class="n">levels</span><span class="p">)]</span>
+    <span class="n">bvs</span> <span class="o">=</span>  <span class="n">depth</span><span class="p">[</span><span class="n">get_columns</span><span class="p">(</span><span class="s">"bv"</span><span class="p">,</span> <span class="n">levels</span><span class="p">)]</span>
+    <span class="n">aps</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">get_columns</span><span class="p">(</span><span class="s">"ap"</span><span class="p">,</span> <span class="n">levels</span><span class="p">)]</span>
+    <span class="n">bps</span> <span class="o">=</span>  <span class="n">depth</span><span class="p">[</span><span class="n">get_columns</span><span class="p">(</span><span class="s">"bp"</span><span class="p">,</span> <span class="n">levels</span><span class="p">)]</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="s">'ap1'</span><span class="p">]</span> <span class="o">+</span> <span class="n">depth</span><span class="p">[</span><span class="s">'bp1'</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">avs</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">aps</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">bvs</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">bps</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">avs</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">bvs</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">mp</span>
+   
+<span class="o">@</span><span class="n">nb</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">_ask_withdraws_volume</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">withdraws</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">price_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="o">+</span><span class="mi">4</span><span class="o">*</span><span class="n">levels</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="n">now_p</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">price_index</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">price_last_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="o">+</span><span class="mi">4</span><span class="o">*</span><span class="n">levels</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="n">price_last_index</span><span class="p">]</span> <span class="o">==</span> <span class="n">now_p</span><span class="p">:</span>
+                <span class="n">withdraws</span> <span class="o">-=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="n">price_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">l</span><span class="p">[</span><span class="n">price_last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">withdraws</span>
+
+<span class="o">@</span><span class="n">nb</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span> <span class="nf">_bid_withdraws_volume</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">withdraws</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">price_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="o">*</span><span class="n">levels</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="n">now_p</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">price_index</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">price_last_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="o">*</span><span class="n">levels</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="n">price_last_index</span><span class="p">]</span> <span class="o">==</span> <span class="n">now_p</span><span class="p">:</span>
+                <span class="n">withdraws</span> <span class="o">-=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="n">price_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">l</span><span class="p">[</span><span class="n">price_last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">withdraws</span>
+
+<span class="k">def</span> <span class="nf">ask_withdraws</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">):</span>
+    <span class="n">ob_values</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">flows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ob_values</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ob_values</span><span class="p">)):</span>
+        <span class="n">flows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ask_withdraws_volume</span><span class="p">(</span><span class="n">ob_values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ob_values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">flows</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bid_withdraws</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">trade</span><span class="p">):</span>
+    <span class="n">ob_values</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">flows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ob_values</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ob_values</span><span class="p">)):</span>
+        <span class="n">flows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_bid_withdraws_volume</span><span class="p">(</span><span class="n">ob_values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ob_values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">flows</span><span class="p">)</span>
+</code></pre></div></div>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Хааны Тэмдэглэл 可汗日报</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Хааны Тэмдэглэл 可汗日报</li>
+          <li><a href="mailto:khaani.temdeglel@gmail.com">khaani.temdeglel@gmail.com</a></li>
+        </ul>
+      </div>
+
+
+    <h2 class="footer-heading">
+      
+        <span id="busuanzi_container_site_pv" style='display:none'>
+         本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+      
+    </h2>
+
+
+	
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/donkeysui"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">donkeysui</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>可汗日报，不定时更新二级市场研究、社会评价、学习笔记、个人感悟。 所有图片影像资料与文本版权归比特汗国全体国民所有。
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
